@@ -158,7 +158,7 @@ void error(const char* msg)
   display.prints(msg);
   while (!keypad.ready()) {
     wdt_reset();
-    WDTCSR|=0x40;
+    WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
     keypad.scan();
   }
   keypad.flush();
@@ -208,9 +208,9 @@ uint8_t j;
   //
   set_sleep_mode(SLEEP_MODE_IDLE);
   sleep_enable();
-  // configure watchdog to interrupt&reset, 4 sec timeout
-  WDTCSR|=0x18;
-  WDTCSR=0xe8;
+  // configure watchdog
+  WDTCSR=(1<<WDE) | (1<<WDCE);
+  WDTCSR=(1<<WDE) | (1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
   // configure timer0 for periodic interrupts
   TCCR0B=5; // timer0 clock prescaler to 1024
   TIMSK0=1; // enable overflow interrupts
@@ -224,7 +224,7 @@ uint8_t j;
   while (1) {
     sleep_cpu(); // timer interrupt wakes us up
     wdt_reset();
-    WDTCSR|=0x40;
+    WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
     keypad.scan();
     if (keypad.ready()) {
       char c=keypad.getch();
@@ -259,12 +259,12 @@ uint8_t j;
               // very frequently
               while (keypad.readall()) {
                 wdt_reset();
-                WDTCSR|=0x40;
+                WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
               }
               cli();
               while (1) {
                 wdt_reset();
-                WDTCSR|=0x40;
+                WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
                 dds.setvalue(ftable[j++]);
                 j&=(COUNTOF(ftable)-1);
                 _delay_us(11);
@@ -275,7 +275,7 @@ uint8_t j;
             }
             while (keypad.pressed()) {
               wdt_reset();
-              WDTCSR|=0x40;
+              WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
             }
             keypad.flush();
             fset("FA",fa);
@@ -288,7 +288,7 @@ uint8_t j;
             j=0;
             while (keypad.readall()) {
               wdt_reset();
-              WDTCSR|=0x40;
+              WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
             }
             TCCR1A=0x81; 
             TCCR1B=0x09; // clock prescaler 1
@@ -296,7 +296,7 @@ uint8_t j;
             cli();
             while (1) {
               wdt_reset();
-              WDTCSR|=0x40;
+              WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
               dds.setvalue(f);
               OCR1AL=am_sintable[j++];              
               j&=(COUNTOF(am_sintable)-1);
@@ -310,7 +310,7 @@ uint8_t j;
             while (keypad.readall())
             {
               wdt_reset();
-              WDTCSR|=0x40;
+              WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
             }            
             keypad.flush();
             fset("FA",fa);
@@ -348,7 +348,7 @@ uint8_t j;
             display.printn(fa+fc);
             while (!keypad.ready()) {
               wdt_reset();
-              WDTCSR|=0x40;
+              WDTCSR=(1<<WDIE) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0) ; // 2sec timout, interrupt+reset
               SYNC_HIGH();
               fd=0;
               for (i=0;i<256;i++) {
